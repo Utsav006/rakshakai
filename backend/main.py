@@ -4,6 +4,7 @@ from database.connection import engine, Base
 import models.asset 
 import models.vulnerability
 from api import dashboard 
+from api import remediation
 
 from api import assets
 from api import vulnerabilities 
@@ -28,6 +29,7 @@ app.include_router(assets.router)
 app.include_router(vulnerabilities.router)
 app.include_router(copilot.router)
 app.include_router(dashboard.router)
+app.include_router(remediation.router)
 
 @app.get("/")
 def read_root():
