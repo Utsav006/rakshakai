@@ -2,7 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.connection import engine, Base
 import models.asset 
-from api import assets  # <-- Import our new router
+import models.vulnerability # <-- Import the new model
+
+from api import assets
+from api import vulnerabilities # <-- Import the new router
 
 # Create all tables in the database automatically
 Base.metadata.create_all(bind=engine)
@@ -19,7 +22,8 @@ app.add_middleware(
 )
 
 # Register the routes
-app.include_router(assets.router)  # <-- Connect the router
+app.include_router(assets.router)
+app.include_router(vulnerabilities.router) # <-- Connect the router
 
 @app.get("/")
 def read_root():
