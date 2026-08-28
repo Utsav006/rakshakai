@@ -5,7 +5,8 @@ import Assets from './pages/Assets';
 import Vulnerabilities from './pages/Vulnerabilities';
 import Copilot from './pages/Copilot';
 import AttackPaths from './pages/AttackPaths';
-import Remediation from './pages/Remediation'; // <-- Import it here
+import Remediation from './pages/Remediation';
+import Reports from './pages/Reports'; // <-- Import it here
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
           <Route path="vulnerabilities" element={<Vulnerabilities />} />
           <Route path="attack-paths" element={<AttackPaths />} />
           <Route path="copilot" element={<Copilot />} />
-          <Route path="remediation" element={<Remediation />} /> {/* <-- Add route here */}
+          <Route path="remediation" element={<Remediation />} />
+          <Route path="reports" element={<Reports />} /> {/* <-- Add route here */}
         </Route>
       </Routes>
     </Router>
