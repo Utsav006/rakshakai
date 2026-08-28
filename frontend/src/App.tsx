@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import DashboardLayout from './components/layout/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Assets from './pages/Assets';
-import Vulnerabilities from './pages/Vulnerabilities'; // <-- Import the new page
+import Vulnerabilities from './pages/Vulnerabilities';
+import Copilot from './pages/Copilot'; // <-- Import the Copilot page
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="assets" element={<Assets />} />
-          <Route path="vulnerabilities" element={<Vulnerabilities />} /> {/* <-- Add the route here */}
+          <Route path="vulnerabilities" element={<Vulnerabilities />} />
+          <Route path="copilot" element={<Copilot />} /> {/* <-- Add the route here */}
         </Route>
       </Routes>
     </Router>
