@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.connection import engine, Base
 import models.asset 
-import models.vulnerability 
+import models.vulnerability
+from api import dashboard 
 
 from api import assets
 from api import vulnerabilities 
@@ -25,7 +26,8 @@ app.add_middleware(
 # Register the routes
 app.include_router(assets.router)
 app.include_router(vulnerabilities.router)
-app.include_router(copilot.router) 
+app.include_router(copilot.router)
+app.include_router(dashboard.router)
 
 @app.get("/")
 def read_root():
