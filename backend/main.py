@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database.connection import engine, Base
+import models.asset  # Import models so SQLAlchemy knows about them
+
+# Create all tables in the database automatically
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="RakshakAI API", version="1.0")
 
