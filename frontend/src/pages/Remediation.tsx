@@ -1,80 +1,113 @@
-import { useEffect, useState } from 'react';
-import { Wrench, CheckCircle, Clock } from 'lucide-react';
+import { useEffect, useState } from "react";
 
-interface Vuln {
+interface Vulnerability {
   id: number;
   cve_id: string;
-  severity: string;
-  status: string;
   description: string;
+  status: string;
+  severity: string;
 }
 
 export default function Remediation() {
-  const [vulns, setVulns] = useState<Vuln[]>([]);
+  const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchVulns = () => {
-    fetch('http://localhost:8000/api/vulnerabilities')
-      .then(res => res.json())
-      .then(data => setVulns(data))
-      .catch(err => console.error(err));
-  };
-
-  useEffect(() => {
-    fetchVulns();
-  }, []);
-
-  const markAsPatched = async (id: number) => {
+  // Fetch remediation items from backend
+  const fetchRemediationData = async () => {
     try {
-      await fetch(`http://localhost:8000/api/remediation/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PATCHED' })
-      });
-      fetchVulns(); // Refresh the list
+      const response = await fetch("http://127.0.0.1:8000/api/remediation/all");
+      if (response.ok) {
+        const data: Vulnerability[] = await response.json();
+        setVulnerabilities(data);
+      }
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Failed to fetch remediation data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white">Remediation Tracker</h1>
-        <p className="text-gray-400 text-sm mt-1">Manage and resolve active security threats</p>
-      </div>
+  useEffect(() => {
+    fetchRemediationData();
+  }, []);
 
-      <div className="grid gap-4">
-        {vulns.map((vuln) => (
-          <div key={vuln.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex justify-between items-center shadow-lg">
+  // Handle patching a vulnerability with explicit number type for vulnId
+  const handleApplyPatch = async (vulnId: number) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/remediation/patch/${vulnId}`, {
+        method: "POST",
+      });
+      
+      if (response.ok) {
+        alert("✅ Patch applied successfully! Threat resolved.");
+        fetchRemediationData();
+      } else {
+        alert("❌ Failed to apply patch.");
+      }
+    } catch (error) {
+      console.error("Error applying patch:", error);
+    }
+  };
+
+  if (loading) return <div style={{ color: "white", padding: "20px" }}>Loading remediation queue...</div>;
+
+  return (
+    <div style={{ padding: "30px", color: "white" }}>
+      <h1>Remediation Tracker</h1>
+      <p style={{ color: "#8a99ad", marginBottom: "20px" }}>Manage and resolve active security threats</p>
+      
+      <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        {vulnerabilities.map((vuln) => (
+          <div 
+            key={vuln.id} 
+            style={{
+              background: "#161b22", 
+              border: "1px solid #30363d", 
+              borderRadius: "8px", 
+              padding: "20px", 
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center"
+            }}
+          >
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-xl font-bold text-white">{vuln.cve_id}</h3>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  vuln.status === 'PATCHED' ? 'bg-green-500/10 text-green-400' : 'bg-orange-500/10 text-orange-400'
-                }`}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ fontWeight: "bold", fontSize: "16px" }}>{vuln.cve_id}</span>
+                <span 
+                  style={{
+                    padding: "2px 8px", 
+                    borderRadius: "4px", 
+                    fontSize: "12px", 
+                    fontWeight: "bold",
+                    background: vuln.status === "RESOLVED" ? "#238636" : "#da3633"
+                  }}
+                >
                   {vuln.status}
                 </span>
               </div>
-              <p className="text-gray-400 text-sm max-w-2xl">{vuln.description}</p>
+              <p style={{ color: "#8b949e", margin: 0, fontSize: "14px" }}>{vuln.description}</p>
             </div>
-            
-            <div>
-              {vuln.status === 'OPEN' ? (
-                <button 
-                  onClick={() => markAsPatched(vuln.id)}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition-colors"
-                >
-                  <Wrench className="h-4 w-4" /> Apply Patch
-                </button>
-              ) : (
-                <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-5 py-2 rounded-lg font-medium border border-green-500/20">
-                  <CheckCircle className="h-4 w-4" /> Resolved
-                </div>
-              )}
-            </div>
+
+            {vuln.status !== "RESOLVED" ? (
+              <button
+                onClick={() => handleApplyPatch(vuln.id)}
+                style={{
+                  background: "#1f6feb",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 16px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                🛠️ Apply Patch
+              </button>
+            ) : (
+              <span style={{ color: "#3fb950", fontWeight: "bold" }}>✔ Resolved</span>
+            )}
           </div>
         ))}
-        {vulns.length === 0 && <p className="text-gray-500">No vulnerabilities found.</p>}
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ from typing import List
 
 router = APIRouter(prefix="/api/ingest", tags=["Automated Ingestion"])
 
-# Define the structure of the incoming data from the startup's agent
 class VulnPayload(BaseModel):
     cve_id: str
     description: str
@@ -18,28 +17,39 @@ class VulnPayload(BaseModel):
 class ScanPayload(BaseModel):
     asset_name: str
     asset_type: str
-    ip_address: str
     vulnerabilities: List[VulnPayload]
 
 @router.post("/scan")
 def ingest_scan_data(payload: ScanPayload, db: Session = Depends(get_db)):
-    # 1. Automatically register the startup's server as a new Asset
-    # We strictly use only the columns that exist in your lean database schema
-    new_asset = Asset(
-        name=payload.asset_name,
-        asset_type=payload.asset_type
-    )
-    db.add(new_asset)
-    db.commit()
-    db.refresh(new_asset)
+    # Pillar 3: Idempotent Asset Management (Upsert)
+    existing_asset = db.query(Asset).filter(Asset.name == payload.asset_name).first()
+    
+    if existing_asset:
+        # Update existing asset
+        existing_asset.asset_type = payload.asset_type
+        db.commit()
+        db.refresh(existing_asset)
+        asset_id = existing_asset.id
+        
+        # Clear old open vulnerabilities to replace with fresh scan data
+        db.query(Vulnerability).filter(Vulnerability.asset_id == asset_id).delete()
+    else:
+        # Create new asset
+        new_asset = Asset(
+            name=payload.asset_name,
+            asset_type=payload.asset_type
+        )
+        db.add(new_asset)
+        db.commit()
+        db.refresh(new_asset)
+        asset_id = new_asset.id
 
-    # 2. Automatically log the vulnerabilities the agent found
+    # Automatically log the vulnerabilities the agent found
     for v in payload.vulnerabilities:
-        # Dynamic Risk Engine math based on the incoming scan
         risk = int(v.cvss_score * 10)
 
         new_vuln = Vulnerability(
-            asset_id=new_asset.id,
+            asset_id=asset_id,
             cve_id=v.cve_id,
             description=v.description,
             severity=v.severity,
@@ -50,4 +60,4 @@ def ingest_scan_data(payload: ScanPayload, db: Session = Depends(get_db)):
         db.add(new_vuln)
     
     db.commit()
-    return {"message": "Agent scan data ingested successfully!", "asset_id": new_asset.id}
+    return {"message": "Health Buddy agent scan data ingested successfully!", "asset_id": asset_id}
