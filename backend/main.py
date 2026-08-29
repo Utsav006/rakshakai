@@ -5,11 +5,10 @@ import models.asset
 import models.vulnerability
 from api import dashboard 
 from api import remediation
-
 from api import assets
 from api import vulnerabilities 
 from api import copilot 
-
+from api import ingest
 # Create all tables in the database automatically
 Base.metadata.create_all(bind=engine)
 
@@ -30,6 +29,7 @@ app.include_router(vulnerabilities.router)
 app.include_router(copilot.router)
 app.include_router(dashboard.router)
 app.include_router(remediation.router)
+app.include_router(ingest.router)
 
 @app.get("/")
 def read_root():
