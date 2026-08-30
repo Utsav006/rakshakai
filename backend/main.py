@@ -9,15 +9,16 @@ from api import assets
 from api import vulnerabilities 
 from api import copilot 
 from api import ingest
+
 # Create all tables in the database automatically
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="RakshakAI API", version="1.0")
 
-# Allow our React frontend to communicate with the API
+# Allow our React frontend (both local and deployed on Vercel) to communicate with the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],  # Allows all origins including Vercel and localhost
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
