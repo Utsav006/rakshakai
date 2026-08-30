@@ -19,17 +19,21 @@ def ask_copilot(request: ChatRequest):
     full_prompt = f"{system_context}\n\nUser Question: {request.message}"
     
     try:
-        # Pinging your LOCAL Ollama engine instead of the cloud
-        response = requests.post('http://localhost:11434/api/generate', json={
-            "model": "phi3",
-            "prompt": full_prompt,
-            "stream": False
-        })
+        # Pinging local Ollama engine at the default port
+        response = requests.post(
+            'http://localhost:11434/api/generate',
+            json={
+                "model": "phi3",
+                "prompt": full_prompt,
+                "stream": False
+            },
+            timeout=60
+        )
         
         if response.status_code == 200:
             reply = response.json().get("response", "I could not generate a response.")
         else:
-            reply = "Error: Local AI engine returned a bad response."
+            reply = f"Error: Local AI engine returned status code {response.status_code}."
             
     except Exception as e:
         reply = f"System Error: Unable to connect to the local AI core. Is Ollama running? Error: {str(e)}"

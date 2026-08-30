@@ -15,7 +15,7 @@ export default function Remediation() {
   // Fetch remediation items from backend
   const fetchRemediationData = async () => {
     try {
-      const response = await fetch("https://rakshak-backend-3kzw.onrender.com/api/remediation/all");
+      const response = await fetch("http://localhost:8000/api/remediation/all");
       if (response.ok) {
         const data: Vulnerability[] = await response.json();
         setVulnerabilities(data);

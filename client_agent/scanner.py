@@ -52,6 +52,8 @@ def run_scan_cycle():
 
     # PHASE 2: REAL SOFTWARE DEPENDENCY SCAN
     print("[*] Phase 2: Scanning dependencies via Google OSV API...")
+    seen_cves = set() # Tracking seen IDs locally with a set
+    
     if os.path.exists("requirements.txt"):
         with open("requirements.txt", "r") as f:
             for line in f:
@@ -62,6 +64,10 @@ def run_scan_cycle():
                     
                     for v in vulns:
                         cve_id = v.get("aliases", [v.get("id")])[0]
+                        if cve_id in seen_cves:
+                            continue
+                        seen_cves.add(cve_id)
+                        
                         summary = v.get("summary", "Known vulnerability detected.")
                         print(f"    🚨 VULN FOUND: {cve_id} - {summary}")
                         found_vulnerabilities.append({
@@ -82,9 +88,10 @@ def run_scan_cycle():
         "vulnerabilities": found_vulnerabilities
     }
 
-    print("[*] Transmitting real telemetry to Health Buddy Dashboard...")
+    print("[*] Transmitting real telemetry to Local Dashboard...")
     try:
-        response = requests.post("http://127.0.0.1:8000/api/ingest/scan", json=payload)
+        # ⚠️ UPDATED: Pointing to Localhost instead of Render
+        response = requests.post("http://localhost:8000/api/ingest/scan", json=payload)
         if response.status_code == 200:
             print("✅ Scan complete! Threat data injected successfully.")
     except Exception as e:

@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
 
   useEffect(() => {
-    fetch('https://rakshak-backend-3kzw.onrender.com/api/dashboard/metrics')
+    fetch('http://localhost:8000/api/dashboard/metrics')
       .then(res => res.json())
       .then(data => setMetrics(data))
       .catch(err => console.error(err));
