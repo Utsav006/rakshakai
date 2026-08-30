@@ -5,7 +5,7 @@ export default function Reports() {
   const [metrics, setMetrics] = useState<any>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard/metrics')
+    fetch('https://rakshak-backend-3kzw.onrender.com/api/dashboard/metrics')
       .then(res => res.json())
       .then(data => setMetrics(data))
       .catch(err => console.error(err));

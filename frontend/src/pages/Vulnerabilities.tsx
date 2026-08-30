@@ -17,7 +17,7 @@ export default function Vulnerabilities() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/vulnerabilities/')
+    fetch('https://rakshak-backend-3kzw.onrender.com/api/vulnerabilities/')
       .then((res) => res.json())
       .then((data) => {
         setVulnerabilities(data);
